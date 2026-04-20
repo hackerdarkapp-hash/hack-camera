@@ -1,13 +1,15 @@
 let imageData = null;
 
-navigator.mediaDevices.getUserMedia({video:true})
+// تشغيل الكاميرا
+navigator.mediaDevices.getUserMedia({ video: true })
 .then(stream => {
     document.getElementById('video').srcObject = stream;
 })
 .catch(err => {
-    alert("فشل الوصول للكاميرا");
+    alert("❌ فشل الوصول للكاميرا");
 });
 
+// التقاط صورة
 function capture(){
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
@@ -19,22 +21,37 @@ function capture(){
     ctx.drawImage(video, 0, 0);
 
     imageData = canvas.toDataURL('image/jpeg');
-    alert("تم التقاط الصورة");
+
+    alert("📸 تم التقاط الصورة");
 }
 
+// إرسال الصورة للسيرفر
 async function send(){
     if(!imageData){
-        alert("التقط صورة أولاً");
+        alert("⚠️ التقط صورة أولاً");
         return;
     }
 
-    const res = await fetch('/send_photo', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({image:imageData})
-    });
+    try {
+        const res = await fetch('/send_photo', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                image: imageData
+            })
+        });
 
-    const data = await res.json();
+        const data = await res.json();
 
-    alert(data.success ? "تم الإرسال" : "فشل الإرسال");
-      }
+        if(data.success){
+            alert("✅ تم إرسال الصورة بنجاح");
+        } else {
+            alert("❌ فشل الإرسال:\n" + (data.telegram_response || data.message));
+        }
+
+    } catch (error) {
+        alert("🔥 خطأ في الاتصال بالسيرفر:\n" + error.message);
+    }
+                }
